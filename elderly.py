@@ -1,5 +1,6 @@
 from mpyc.runtime import mpc
 
+
 async def main():
     secint = mpc.SecInt(16)  # Secure types
 
