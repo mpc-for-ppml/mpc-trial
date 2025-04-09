@@ -1,6 +1,8 @@
 from mpyc.runtime import mpc
 import numpy as np
 import matplotlib.pyplot as plt
+from sklearn.datasets import fetch_california_housing
+from sklearn.preprocessing import StandardScaler
 
 secfxp = mpc.SecFxp()
 
@@ -35,12 +37,23 @@ async def secure_linear_regression(X_local, y_local):
     return theta
 
 
-# Each party will have their own data — simulate here
-np.random.seed(200)
+# Dataset processing
+# Load dataset
+california = fetch_california_housing()
+X_raw = california.data
+y_raw = california.target
 
-X_local = np.random.rand(10, 5).tolist()
-X_local = [x + [1] for x in X_local]  # Add bias
-y_local = np.random.rand(10).tolist()
+# Standardize features
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X_raw)
+
+# Add bias term (column of 1s)
+X = np.hstack([X_scaled, np.ones((X_scaled.shape[0], 1))])
+y = y_raw
+
+# Use a subset (e.g., first 10 rows for MPC testing)
+X_local = X[:40].tolist()
+y_local = y[:40].tolist()
 
 theta = mpc.run(secure_linear_regression(X_local, y_local))
 print("Estimated theta (coefficients):", theta)
